@@ -1,0 +1,24 @@
+{
+  "name": "prop-types-parser",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:anc95/prop-types-parser.git",
+  "author": "anchao",
+  "license": "MIT",
+  "scripts": {
+    "dev": "tsc -w"
+  },
+  "devDependencies": {
+    "@types/babel-core": "^6.25.3",
+    "@types/node": "^9.6.2"
+  },
+  "dependencies": {
+    "@babel/traverse": "^7.0.0-beta.44",
+    "@babel/types": "^7.0.0-beta.44",
+    "@types/babylon": "^6.16.2",
+    "@types/lodash": "^4.14.106",
+    "babel-core": "^6.26.0",
+    "babylon": "^6.18.0",
+    "lodash": "^4.17.5"
+  }
+}
