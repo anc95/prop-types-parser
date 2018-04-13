@@ -7,7 +7,7 @@ import {
     isDirectory, 
     isFile,
     hasExtension
-} from '../util'
+} from '../utils'
 import { join as pathResolve, isAbsolute } from 'path'
 import * as _ from 'lodash'
 

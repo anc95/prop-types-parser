@@ -4,7 +4,8 @@ import {
 import {join as pathJoin} from 'path'
 import {transformFromAst, Node, transform} from 'babel-core'
 import {parse, BabylonOptions} from 'babylon'
-import { File, Program, VariableDeclaration, ClassProperty } from 'babel-types'
+import { File, Program, VariableDeclaration, ClassProperty, exportDefaultDeclaration } from 'babel-types'
+import resolveExportedComponent from './resolveExportedComponent'
 const traverse = require('@babel/traverse').default
 const t = require('@babel/types')
 
@@ -29,47 +30,62 @@ export default function(file: string, cwd: string): string | undefined {
     } 
     const content = readFileSync(file, 'utf8')
     const ast: File = parse(content, AST_PARSE_CONFIG)
-
     traverse(ast, {
-        ImportDeclaration(path: any) {
-            const node = path.node
-            const lib = node.source.value
-
-            if (lib[0] === '.' || protectLib.indexOf(lib) > -1) {
-                programAst.body.push(node)
-            }
-
-            if (lib === 'prop-types') {
-                node.source = t.stringLiteral(easyPropTypeModule)
-            } else {
-                node.source = t.stringLiteral(pathJoin(cwd, lib))
-            }
-        },
-
-        VariableDeclaration(path: any) {
-            const type = path.parent.type
-            if (['ExportNamedDeclaration', 'Program'].indexOf(type) !== -1) {
-                programAst.body.push(path.node)
-            }
-        },
-
-        ExportDefaultDeclaration(path: any) {
-            path.traverse({
-                ClassProperty(path: any) {
-                    const node = path.node
-                    if (t.isIdentifier(node.key)
-                        && node.key.name === 'propTypes'
-                    ) {
-                        node.static = false
-                        programAst.body.push(transStaticPropertyToDeclare(node)) 
-                    }
-                }
-            })
+        Program(path: any) {
+            programAst.body.push(resolveExportedComponent(path).node)
         }
     })
+    // traverse(ast, {
+    //     ImportDeclaration(path: any) {
+    //         const node = path.node
+    //         const lib = node.source.value
+
+    //         if (lib[0] === '.' || protectLib.indexOf(lib) > -1) {
+    //             programAst.body.push(node)
+    //         }
+
+    //         if (lib === 'prop-types') {
+    //             node.source = t.stringLiteral(easyPropTypeModule)
+    //         } else {
+    //             const filePath = pathJoin(cwd, lib)
+    //             if (/\/[a-zA-Z_-]+(\.(js|jsx|es6))?$/.test(filePath)) {
+    //                 node.source = t.stringLiteral(filePath)
+    //             } else {
+    //                 programAst.body.pop()
+    //             }
+    //         }
+    //     },
+
+    //     VariableDeclaration(path: any) {
+    //         const type = path.parent.type
+    //         if (['ExportNamedDeclaration', 'Program'].indexOf(type) !== -1) {
+    //             programAst.body.push(path.node)
+    //         }
+    //     },
+
+    //     ExportDefaultDeclaration(path: any) {
+    //         path.traverse({
+    //             ClassProperty(path: any) {
+    //                 const node = path.node
+    //                 if (t.isIdentifier(node.key)
+    //                     && node.key.name === 'propTypes'
+    //                 ) {
+    //                     node.static = false
+    //                     programAst.body.push(transStaticPropertyToDeclare(node)) 
+    //                 }
+    //             }
+    //         })
+    //     }
+    // })
 
     const code = transformFromAst(programAst).code || ''
     return transform(code, {presets: ['babel-preset-env']}).code
+}
+
+function getIdenfitersOfObjectValue(path: any) {
+    path.traverse({
+        
+    })
 }
 
 
