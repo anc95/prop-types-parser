@@ -6,6 +6,7 @@ import {transformFromAst, Node, transform} from 'babel-core'
 import {parse, BabylonOptions} from 'babylon'
 import { File, Program, VariableDeclaration, ClassProperty, exportDefaultDeclaration } from 'babel-types'
 import resolveExportedComponent from './resolveExportedComponent'
+import findAllDependencesByObj from '../utils/findAllDependencesByObj'
 const traverse = require('@babel/traverse').default
 const t = require('@babel/types')
 
@@ -28,11 +29,26 @@ export default function(file: string, cwd: string): string | undefined {
         type: 'Program',
         body: []
     } 
+    let classDeclarationPath
     const content = readFileSync(file, 'utf8')
     const ast: File = parse(content, AST_PARSE_CONFIG)
     traverse(ast, {
         Program(path: any) {
-            programAst.body.push(resolveExportedComponent(path).node)
+            // console.log(resolveExportedComponent(path))
+            classDeclarationPath = resolveExportedComponent(path)
+        }
+    })
+
+    classDeclarationPath.traverse({
+        ClassProperty: function(path) {
+            const node = path.node
+            if (t.isIdentifier(node.key)
+                && node.key.name === 'propTypes'
+            ) {
+                findAllDependencesByObj(path.get('value'))
+                // node.static = false
+                // programAst.body.push(transStaticPropertyToDeclare(node)) 
+            }
         }
     })
     // traverse(ast, {
