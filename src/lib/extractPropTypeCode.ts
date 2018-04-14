@@ -14,7 +14,7 @@ import * as _ from 'lodash'
 const easyPropTypeModule = pathJoin(__dirname, 'propTypes.js')
 const babelRegisterCode: string = `
 require('babel-register')({
-    presets: ['env]
+    presets: ['env']
 })
 `
 
@@ -46,7 +46,7 @@ export default function(propTypesPath: NodePath): string {
 
     programAst.body.push(transStaticPropertyToDeclare(node)) 
     const code: string = <string>transformFromAst(programAst).code
-    return babelRegisterCode + transform(code, {presets: ['babel-preset-env']}).code
+    return babelRegisterCode + transform(code, {presets: ['babel-preset-env']}).code + 'callback && callback(_propTypes_)'
 }
 
 /**

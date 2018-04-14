@@ -8,6 +8,7 @@ import traverse, { NodePath } from 'babel-traverse'
 import extractPropTypeCode from './extractPropTypeCode'
 import * as t from 'babel-types'
 import getJsonObjComments from '../utils/getJsonObjComments'
+import * as vm from 'vm'
 
 const AST_PARSE_CONFIG: BabylonOptions = {
     sourceType: 'module',
@@ -46,9 +47,8 @@ export default function(file: string) {
     }
 
     const value: any = (<NodePath>propsTypesPath).get('value')
-    console.log(getJsonObjComments(value))
-
-    console.log(extractPropTypeCode(<NodePath>propsTypesPath))
+    const code = extractPropTypeCode(<NodePath>propsTypesPath)
+    console.log(execExtractCode(code))
 }
 
 /**
@@ -71,4 +71,20 @@ function getPropTypesPath(path: NodePath): NodePath | null {
     })
 
     return propTypesPath
+}
+
+/**
+ * 执行代码, 拿到propTypes
+ * @param code 代码内容为字符串
+ */
+function execExtractCode(code: string) {
+    let result: any = null
+    const script = new vm.Script(code)
+    const sandbox = { require, console, callback: ((res: any) => {
+        result = res
+    })};
+    vm.createContext(sandbox);
+    script.runInContext(sandbox)
+    
+    return result
 }
