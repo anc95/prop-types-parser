@@ -21,7 +21,7 @@ export default function(path: Path): Path[] {
         MemberExpression: ignore,
         Property: handleProperty
     })
-console.log(visitedId)
+    
     return dependences    
 }
 

@@ -28,6 +28,6 @@ export default function(ast: Path) {
         FunctionDeclaration: ignore,
         ExportDefaultDeclaration: handleExportDefaultDeclaration
     })
-
+    
     return exportedComponent
 }

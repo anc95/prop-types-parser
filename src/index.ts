@@ -4,16 +4,19 @@ import {
 import parsePropTypes from './lib/parsePropTypes'
 
 const config: ParserConfig = {
-    // base: '/Users/anchao01/code/erp-comp-helper/node_modules/@befe/erp-comps/v2/components/',
+    base: '/Users/anchao01/code/erp-comp-helper/node_modules/@befe/erp-comps/v2/components/',
     fileExtension: 'js',
     components: [
-        // ['Avatar'],
-        ['Button', {
-            location: './a'
+        ['Section', {
+            location: '/Users/anchao01/code/erp-comp-helper/node_modules/@befe/erp-comps/v2/components/Section/Container.js'
         }],
-        // ['Select', {
-        //     location: '/Users/anchao01/code/erp-comp-helper/node_modules/@befe/erp-comps/v2/components/Select/Generic.jas'
-        // }]
+        ['Avatar'],
+        ['Button', {
+            location: './Button'
+        }],
+        ['Select', {
+            location: '/Users/anchao01/code/erp-comp-helper/node_modules/@befe/erp-comps/v2/components/Select/Generic.js'
+        }]
     ]
 }
 parsePropTypes(config)

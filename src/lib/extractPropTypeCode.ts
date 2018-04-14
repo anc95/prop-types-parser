@@ -45,12 +45,22 @@ export default function(file: string, cwd: string): string | undefined {
             if (t.isIdentifier(node.key)
                 && node.key.name === 'propTypes'
             ) {
-                findAllDependencesByObj(path.get('value'))
-                // node.static = false
-                // programAst.body.push(transStaticPropertyToDeclare(node)) 
+                const dependencies = findAllDependencesByObj(path.get('value'))
+
+                if (dependencies && dependencies.length) {
+                    dependencies.forEach(dep => {
+                        programAst.body.push(dep.node)
+                    })
+                }
+
+                
+                node.static = false
+                programAst.body.push(transStaticPropertyToDeclare(node)) 
             }
         }
     })
+
+    
     // traverse(ast, {
     //     ImportDeclaration(path: any) {
     //         const node = path.node
@@ -95,6 +105,7 @@ export default function(file: string, cwd: string): string | undefined {
     // })
 
     const code = transformFromAst(programAst).code || ''
+    console.log(code)
     return transform(code, {presets: ['babel-preset-env']}).code
 }
 
