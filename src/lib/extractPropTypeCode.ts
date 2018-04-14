@@ -11,7 +11,7 @@ import traverse, { NodePath } from 'babel-traverse'
 import * as t from 'babel-types'
 import * as _ from 'lodash'
 
-const easyPropTypeModule = pathJoin(__dirname, 'propTypes.ts')
+const easyPropTypeModule = pathJoin(__dirname, 'propTypes.js')
 const babelRegisterCode: string = `
 require('babel-register')({
     presets: ['env]

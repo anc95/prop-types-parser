@@ -1,14 +1,12 @@
 import {
     readFileSync
 } from 'fs'
-import {join as pathJoin} from 'path'
 import {parse, BabylonOptions} from 'babylon'
-import { File, Program, ClassProperty } from 'babel-types'
+import { File, ClassProperty } from 'babel-types'
 import resolveExportedComponent from './resolveExportedComponent'
 import traverse, { NodePath } from 'babel-traverse'
 import extractPropTypeCode from './extractPropTypeCode'
 import * as t from 'babel-types'
-import {PropType} from '../../types/props'
 import getJsonObjComments from '../utils/getJsonObjComments'
 
 const AST_PARSE_CONFIG: BabylonOptions = {
@@ -47,10 +45,8 @@ export default function(file: string) {
         throw new Error(`cannot find proptypes defination in ${file}`)
     }
 
-    console.log()
-    const a: any = (<NodePath>propsTypesPath).get('value')
-    // getJsonObjComments(a)
-    console.log(getJsonObjComments(a))
+    const value: any = (<NodePath>propsTypesPath).get('value')
+    console.log(getJsonObjComments(value))
 
     console.log(extractPropTypeCode(<NodePath>propsTypesPath))
 }
