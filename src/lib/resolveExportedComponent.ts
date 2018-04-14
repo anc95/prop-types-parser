@@ -2,18 +2,19 @@ const t = require('@babel/types')
 import ignore from '../utils/ignore'
 import findIndentifierDeclaration from '../utils/findIndentifierDeclaration'
 import isExtendReactComponent from '../utils/isExtendReactComponent'
-import {Path} from '../../types/ast'
+import { NodePath } from 'babel-traverse';
+import * as _ from 'lodash'
 
-export default function(ast: Path) {
-    let exportedComponent: Path | null = null
+export default function(ast: NodePath): NodePath | null {
+    let exportedComponent: NodePath | null = null
 
-    function handleExportDefaultDeclaration(path: Path) {
-        const declaration: Path = <Path>path.get('declaration')
+    function handleExportDefaultDeclaration(path: NodePath) {
+        const declaration: NodePath = <NodePath>path.get('declaration')
 
         if (t.isClassDeclaration(declaration)) {
             exportedComponent = declaration
         } else if (t.isIdentifier(declaration)) {
-            exportedComponent = findIndentifierDeclaration(path, declaration.node.name)
+            exportedComponent = findIndentifierDeclaration(path, _.get(declaration, 'node.name'))
         }
         
         if (!isExtendReactComponent(exportedComponent)) {

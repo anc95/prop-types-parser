@@ -7,6 +7,10 @@ export default function(config: ParserConfig) {
 
     for (let key of Object.keys(components)) {
         const compConfig = components[key]
-        extractPropTypeCode(compConfig.location, compConfig.cwd)
+        // const result: string | undefined = extractPropTypeCode(compConfig.location, compConfig.cwd)
+
+        // if (result) {
+        //     console.log(result)
+        // }
     }
 }

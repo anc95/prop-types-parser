@@ -9,14 +9,14 @@
  */
 const t = require('@babel/types')
 import * as _ from 'lodash'
-import {Path} from '../../types/ast'
 import ignore from './ignore'
 import findIndentifierDeclaration from './findIndentifierDeclaration'
+import { NodePath } from 'babel-traverse';
 
-const dependences:Path[] = []
+const dependences: NodePath[] = []
 const visitedId = {}
 
-export default function(path: Path): Path[] {
+export default function(path: NodePath): NodePath[] {
     path.traverse({
         MemberExpression: ignore,
         Property: handleProperty
@@ -25,8 +25,8 @@ export default function(path: Path): Path[] {
     return dependences    
 }
 
-function handleProperty(path: Path) {
-    const valuePath: Path = path.get('value')
+function handleProperty(path: NodePath) {
+    const valuePath: NodePath = path.get('value')
     const valueNode = valuePath.node
 
     switch (valueNode.type) {
