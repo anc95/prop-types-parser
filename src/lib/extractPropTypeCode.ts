@@ -1,42 +1,36 @@
-import {
-    readFileSync
-} from 'fs'
 import {join as pathJoin} from 'path'
 import {transformFromAst, Node, transform} from 'babel-core'
-import {parse, BabylonOptions} from 'babylon'
-import { File, Program, VariableDeclaration, ClassProperty, exportDefaultDeclaration, classDeclaration } from 'babel-types'
-import resolveExportedComponent from './resolveExportedComponent'
+import {BabylonOptions} from 'babylon'
+import { Program, VariableDeclaration } from 'babel-types'
 import findAllDependencesByObj from '../utils/findAllDependencesByObj'
-import traverse, { NodePath } from 'babel-traverse'
+import { NodePath } from 'babel-traverse'
 import * as t from 'babel-types'
 import * as _ from 'lodash'
 
-const easyPropTypeModule = pathJoin(__dirname, 'propTypes.js')
+const easyPropTypeModule = pathJoin(__dirname, '../utils/propTypes.js')
 const babelRegisterCode: string = `
+var exportPropTypes = require('../plugins/exportPropTypes')
 require('babel-register')({
-    presets: ['env']
+    presets: ['env'],
+    plugins: [
+        exportPropTypes
+    ],
+    ignore: /node_modules\\/(?!@befe)/
 })
 `
 
-const AST_PARSE_CONFIG: BabylonOptions = {
-    sourceType: 'module',
-    plugins: [
-        'classProperties',
-        'objectRestSpread'
-    ]
-}
 /**
  * 将proptypes相关代码单独解析出来
  * @param propTypesPath 代码中propTypes定义所在的path
  */
-export default function(propTypesPath: NodePath): string {
+export default function(propTypesPath: NodePath, cwd: string): string {
     let programAst: Program | any = {
         type: 'Program',
         body: []
     }
     const node = propTypesPath.node
     const dependencies = findAllDependencesByObj(propTypesPath.get('value'))
-    changeImportedPropTypesSource(dependencies)
+    changeImportedSource(dependencies, cwd)
 
     if (dependencies && dependencies.length) {
         dependencies.forEach(dep => {
@@ -50,15 +44,21 @@ export default function(propTypesPath: NodePath): string {
 }
 
 /**
- * 改变prop-types库的引用
- * @param dependencies proptypes定义中的变量依赖
+ * 改变库的引用
+ * @param dependencies require所引用的路径替换 相对到绝对, 对prop-types替换
  */
-function changeImportedPropTypesSource(dependencies: NodePath[]) {
+function changeImportedSource(dependencies: NodePath[], cwd: string) {
     dependencies.some(dep => {
         if (t.isLiteral(dep.get('source'))) {
-            if (_.get(dep, 'node.source.value') === 'prop-types') {
+            const sourceName = _.get(dep, 'node.source.value')
+            console.log(sourceName)
+            if (sourceName === 'prop-types') {
                 dep.get('source').replaceWith(
                     t.stringLiteral(easyPropTypeModule)
+                )
+            } else if (sourceName) {
+                dep.get('source').replaceWith(
+                    t.stringLiteral(pathJoin(cwd, sourceName))
                 )
             }
         }

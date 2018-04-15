@@ -24,9 +24,7 @@ export default function(path: ObjectExpression): any[] {
                 desc += d.value.replace(/(\*)*\s*\n\s*(\*)*/g, '\n')
             })
 
-            result.push({
-                [key]: desc
-            })
+            result[key] = desc
         }
     })
 

@@ -13,19 +13,28 @@ import ignore from './ignore'
 import findIndentifierDeclaration from './findIndentifierDeclaration'
 import { NodePath } from 'babel-traverse';
 
-const dependences: NodePath[] = []
-const visitedId = {}
-
 export default function(path: NodePath): NodePath[] {
+    const dependences: NodePath[] = []
+    const visitedId = {}
+
+    if (t.isIdentifier(path)) {
+        const dep = findIndentifierDeclaration(path, _.get(path, 'node.name'))
+        if (dep) {
+            dependences.push(dep)
+        }
+
+        return dependences
+    }
+
     path.traverse({
         MemberExpression: ignore,
-        Property: handleProperty
+        Property: handleProperty.bind(null, visitedId, dependences)
     })
     
     return dependences    
 }
 
-function handleProperty(path: NodePath) {
+function handleProperty(visitedId: any, dependences: NodePath[], path: NodePath) {
     const valuePath: NodePath = path.get('value')
     const valueNode = valuePath.node
 
@@ -41,7 +50,7 @@ function handleProperty(path: NodePath) {
                 break
             }
 
-            saveDependecies(path, id)
+            saveDependecies(path, id, visitedId, dependences)
             break
         case 'CallExpression':
             const ids = _.get(valueNode, 'arguments')
@@ -55,7 +64,7 @@ function handleProperty(path: NodePath) {
                     continue
                 }
 
-                saveDependecies(path, id)
+                saveDependecies(path, id, visitedId, dependences)
             }
             break
         default:
@@ -63,7 +72,7 @@ function handleProperty(path: NodePath) {
     }
 }
 
-function saveDependecies(path: any, id: string): void {
+function saveDependecies(path: any, id: string, visitedId: any, dependences: NodePath[]): void {
     const foundDependencyPath = findIndentifierDeclaration(path, id)
     if (foundDependencyPath) {
         dependences.push(foundDependencyPath)

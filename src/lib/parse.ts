@@ -9,6 +9,7 @@ import extractPropTypeCode from './extractPropTypeCode'
 import * as t from 'babel-types'
 import getJsonObjComments from '../utils/getJsonObjComments'
 import * as vm from 'vm'
+import * as path from 'path'
 
 const AST_PARSE_CONFIG: BabylonOptions = {
     sourceType: 'module',
@@ -25,11 +26,6 @@ export default function(file: string) {
     let classDeclarationPath: NodePath | null = null
     const content = readFileSync(file, 'utf8')
     const ast: File = parse(content, AST_PARSE_CONFIG)
-    const result = {
-        description: '',
-        displayName: '',
-        props: []
-    }
     traverse(ast, {
         Program(path: NodePath) {
             classDeclarationPath = resolveExportedComponent(path)
@@ -47,8 +43,18 @@ export default function(file: string) {
     }
 
     const value: any = (<NodePath>propsTypesPath).get('value')
-    const code = extractPropTypeCode(<NodePath>propsTypesPath)
-    console.log(execExtractCode(code))
+    const code = extractPropTypeCode(<NodePath>propsTypesPath, path.dirname(file))
+    console.log(code)
+    const comments = getJsonObjComments(value)
+    const propTypes = execExtractCode(code)
+
+    for (let key of Object.keys(propTypes)) {
+        if (comments[key]) {
+            propTypes[key].description = comments[key]
+        }
+    }
+
+    return propTypes
 }
 
 /**

@@ -1,18 +1,4 @@
 export default class {
-    // array: 'array',
-    // bool: 'bool',
-    // func: '[TYPE]func',
-    // number: '[TYPE]number',
-    // object: '[TYPE]object',
-    // string: '[TYPE]string',
-    // symbol: '[TYPE]symbol',
-    // oneOf(param) {
-    //     return param
-    // },
-    // oneOfType(param) {
-    //     return param
-    // }
-
     static get array() {
         return Type('array')
     }
@@ -49,12 +35,12 @@ export default class {
 function Type(type, params) {
     const returnType = {
         type,
-        require: false
+        require: false,
+        description: ''
     }
 
     Object.defineProperty(returnType, 'isRequired', {
         get: function() {
-            console.log('hahhahha')
             returnType.require = true
             return returnType
         }
