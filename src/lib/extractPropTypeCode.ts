@@ -13,7 +13,14 @@ var exportPropTypes = require('../plugins/exportPropTypes')
 require('babel-register')({
     presets: ['env'],
     plugins: [
-        exportPropTypes
+        [
+            exportPropTypes,
+            {
+                alias: {
+                    '@befe': '/Users/anchao01/code/erp-comp-helper/node_modules/@befe'
+                }
+            }
+        ]
     ],
     ignore: /node_modules\\/(?!@befe)/
 })
@@ -51,7 +58,6 @@ function changeImportedSource(dependencies: NodePath[], cwd: string) {
     dependencies.some(dep => {
         if (t.isLiteral(dep.get('source'))) {
             const sourceName = _.get(dep, 'node.source.value')
-            console.log(sourceName)
             if (sourceName === 'prop-types') {
                 dep.get('source').replaceWith(
                     t.stringLiteral(easyPropTypeModule)

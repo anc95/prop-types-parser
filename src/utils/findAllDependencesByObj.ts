@@ -30,14 +30,12 @@ export default function(path: NodePath): NodePath[] {
         MemberExpression: ignore,
         Property: handleProperty.bind(null, visitedId, dependences)
     })
-    
     return dependences    
 }
 
 function handleProperty(visitedId: any, dependences: NodePath[], path: NodePath) {
     const valuePath: NodePath = path.get('value')
     const valueNode = valuePath.node
-
     switch (valueNode.type) {
         case 'MemberExpression':
         case 'Identifier':
@@ -75,7 +73,7 @@ function handleProperty(visitedId: any, dependences: NodePath[], path: NodePath)
 function saveDependecies(path: any, id: string, visitedId: any, dependences: NodePath[]): void {
     const foundDependencyPath = findIndentifierDeclaration(path, id)
     if (foundDependencyPath) {
-        dependences.push(foundDependencyPath)
         visitedId[id] = true
+        dependences.push(foundDependencyPath)
     }
 }

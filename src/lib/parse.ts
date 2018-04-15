@@ -44,7 +44,6 @@ export default function(file: string) {
 
     const value: any = (<NodePath>propsTypesPath).get('value')
     const code = extractPropTypeCode(<NodePath>propsTypesPath, path.dirname(file))
-    console.log(code)
     const comments = getJsonObjComments(value)
     const propTypes = execExtractCode(code)
 

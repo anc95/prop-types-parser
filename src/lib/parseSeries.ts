@@ -1,5 +1,4 @@
 import { ParserConfig } from '../../types/config'
-import extractPropTypeCode from './extractPropTypeCode'
 import parseConfig from './parseConfig'
 import parse from './parse'
 
