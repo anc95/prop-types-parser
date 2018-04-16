@@ -14,8 +14,8 @@ import ignore from './ignore'
 import findIndentifierDeclaration from './findIndentifierDeclaration'
 import { NodePath } from 'babel-traverse';
 
-export default function findAllDependencies(path: NodePath, visitedId?: any): NodePath[] {
-    const dependences: NodePath[] = []
+export default function findAllDependencies(path: NodePath, visitedId?: any, dependences?: NodePath[]): NodePath[] {
+    dependences = dependences ? dependences : []
     visitedId = visitedId ? visitedId : {}
 
     if (t.isIdentifier(path)) {
@@ -28,15 +28,31 @@ export default function findAllDependencies(path: NodePath, visitedId?: any): No
     }
 
     path.traverse({
-        MemberExpression: ignore,
+        MemberExpression: handleMemberExpression.bind(null, visitedId, dependences),
         SpreadProperty: handleSpreadProperty.bind(null, visitedId, dependences),
         Property: handleProperty.bind(null, visitedId, dependences),
         ObjectExpression: (path: NodePath) => {
-            findAllDependencies(path, visitedId)
+            findAllDependencies(path, visitedId, dependences)
+        }
+    })
+
+    _.set(path, 'visited', true)
+
+    dependences.forEach(path => {
+        console.log(_.get(path, 'visited'))
+        if (!_.get(path, 'visited')) {
+            findAllDependencies(path, visitedId, dependences)
         }
     })
     
     return dependences    
+}
+
+function handleMemberExpression (visitedId: any, dependences: NodePath[], path: NodePath) {
+    if (t.isIdentifier(path.get('object'))) {
+        const id = _.get(path, 'node.object.name')
+        saveDependecies(path, id, visitedId, dependences)
+    }
 }
 
 function handleSpreadProperty(visitedId: any, dependences: NodePath[], path: NodePath) {
@@ -61,24 +77,28 @@ function handleProperty(visitedId: any, dependences: NodePath[], path: NodePath)
             saveDependecies(path, id, visitedId, dependences)
             break
         case 'CallExpression':
-            // a(b) or a.c(b)
-            const calleeId = _.get(valueNode, 'callee.name') || _.get(valueNode, 'callee.object.name')
-            saveDependecies(path, calleeId, visitedId, dependences)
-            const ids = _.get(valueNode, 'arguments')
-            for (let i = 0, len = ids.length; i < len; i++) {
-                const id = ids[i].name
-                if (t.isIdentifier(ids[i])) {
-                    saveDependecies(path, id, visitedId, dependences)
-                }
-
-                if (t.isMemberExpression(ids[i])) {
-                    const id = _.get(ids[i], 'object.name')
-                    saveDependecies(path, id, visitedId, dependences)
-                }
-            }
+            handleCallExpression(visitedId, dependences, valueNode, path)
             break
         default:
             break
+    }
+}
+
+function handleCallExpression(visitedId: any, dependences: NodePath[], valueNode: any, path: NodePath) {
+    // a(b) or a.c(b)
+    const calleeId = _.get(valueNode, 'callee.name') || _.get(valueNode, 'callee.object.name')
+    saveDependecies(path, calleeId, visitedId, dependences)
+    const ids = _.get(valueNode, 'arguments')
+    for (let i = 0, len = ids.length; i < len; i++) {
+        const id = ids[i].name
+        if (t.isIdentifier(ids[i])) {
+            saveDependecies(path, id, visitedId, dependences)
+        }
+
+        if (t.isMemberExpression(ids[i])) {
+            const id = _.get(ids[i], 'object.name')
+            saveDependecies(path, id, visitedId, dependences)
+        }
     }
 }
 
