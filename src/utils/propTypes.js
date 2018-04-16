@@ -1,10 +1,10 @@
 export default class {
-    static get array() {
-        return Type('array')
-    }
-
     static get bool() {
         return Type('bool')
+    }
+
+    static get array() {
+        return Type('array')
     }
 
     static get func() {
@@ -29,6 +29,14 @@ export default class {
 
     static oneOf(params) {
         return  Type('enum', params)
+    }
+
+    static oneOfType(params) {
+        return Type('oneOfType')
+    }
+
+    static shape(params) {
+        return Type('shape')
     }
 }
 

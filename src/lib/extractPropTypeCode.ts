@@ -11,8 +11,10 @@ const easyPropTypeModule = pathJoin(__dirname, '../utils/propTypes.js')
 const babelRegisterCode: string = `
 var exportPropTypes = require('../plugins/exportPropTypes')
 require('babel-register')({
-    presets: ['env'],
+    presets: [require('babel-preset-env'), require('babel-preset-stage-0')],
+    cache: false,
     plugins: [
+        // require('babel-plugin-transform-object-rest-spread'),
         [
             exportPropTypes,
             {
