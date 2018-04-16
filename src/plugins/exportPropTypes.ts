@@ -4,14 +4,13 @@ import { dirname } from 'path'
 import * as path from 'path'
 import * as t from 'babel-types'
 import { NodePath } from 'babel-traverse';
-import findAllDependencesByObj from '../utils/findAllDependencesByObj'
 
 const easyPropTypes = path.join(__dirname, '../utils/propTypes.js')
 
 module.exports = function() {
-    let visitedPropsTypes: boolean = false
-    let dependencies = []
-    let body: NodePath[] = []
+    // let visitedPropsTypes: boolean = false
+    // let dependencies = []
+    // let body: NodePath[] = []
     let dir = ''
     return {
         visitor: {
@@ -28,13 +27,12 @@ module.exports = function() {
                 }
             },
             ImportDeclaration(path: NodePath, state: any) {
-                console.log('******************* import **************')
                 const sourceName = _.get(path, 'node.source.value')
                 if (sourceName === 'prop-types') {
                     path.get('source').replaceWith(
                         t.stringLiteral(easyPropTypes)
                     )
-                    visitedPropsTypes = true
+                    // visitedPropsTypes = true
                 } else {
                     const alias = _.get(state, 'opts.alias')
                     if (!alias) {

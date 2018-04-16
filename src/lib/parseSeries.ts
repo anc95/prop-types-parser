@@ -10,4 +10,6 @@ export default function(config: ParserConfig) {
         const compConfig = components[key]
         result[key] = parse(compConfig.location)
     }
+
+    return result
 }

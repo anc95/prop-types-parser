@@ -52,7 +52,7 @@ export default function(file: string) {
             propTypes[key].description = comments[key]
         }
     }
-
+    
     return propTypes
 }
 
