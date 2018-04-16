@@ -2,14 +2,28 @@ import { ParserConfig } from '../../types/config'
 import parseConfig from './parseConfig'
 import parse from './parse'
 
-export default function(config: ParserConfig) {
-    const components = parseConfig(config)
+export default function(options: ParserConfig) {
+    const { validComponents, alias } = parseConfig(options)
     const result = {}
-
-    for (let key of Object.keys(components)) {
-        const compConfig = components[key]
-        result[key] = parse(compConfig.location)
-    }
-
+    const keys = Object.keys(validComponents) 
+    
+    tryParse(result, keys, validComponents, alias)
     return result
+}
+
+let i = 0
+function tryParse(result: object, keys: string[], validComponents: any, alias: object) {
+    console.log('enter')
+    try {
+        for (; i < keys.length; i++) {
+            const key = keys[i]
+            console.log(key)
+            const compConfig = validComponents[key]
+            result[key] = parse(compConfig.location, alias)
+        }
+    } catch (e) {
+        console.log(e)
+        i++
+        tryParse(result, keys, validComponents, alias)
+    }
 }

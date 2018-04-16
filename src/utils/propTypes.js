@@ -27,8 +27,12 @@ export default class {
         return Type('object')
     }
 
+    static get node() {
+        return Type('node')
+    }
+
     static oneOf(params) {
-        return  Type('enum', params)
+        return Type('enum', params)
     }
 
     static oneOfType(params) {
@@ -37,6 +41,10 @@ export default class {
 
     static shape(params) {
         return Type('shape')
+    }
+
+    static objectOf() {
+        return Type('object')
     }
 }
 

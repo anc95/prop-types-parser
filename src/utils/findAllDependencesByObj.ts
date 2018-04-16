@@ -31,8 +31,11 @@ export default function findAllDependencies(path: NodePath, visitedId?: any): No
         MemberExpression: ignore,
         SpreadProperty: handleSpreadProperty.bind(null, visitedId, dependences),
         Property: handleProperty.bind(null, visitedId, dependences),
-        ObjectExpression: (path: NodePath) => findAllDependencies(path, visitedId)
+        ObjectExpression: (path: NodePath) => {
+            findAllDependencies(path, visitedId)
+        }
     })
+    
     return dependences    
 }
 

@@ -15,13 +15,15 @@ export default function (config: ParserConfig): ParserConfig {
     let resolvedConfig: ParserConfig = {
         base: process.cwd(),
         fileExtension: 'js',
-        components: []
+        components: [],
+        alias: {}
     }
 
     let {
         base,
         components,
-        fileExtension
+        fileExtension,
+        alias
     } = config
 
     if (base) {
@@ -30,6 +32,10 @@ export default function (config: ParserConfig): ParserConfig {
 
     if (fileExtension) {
         resolvedConfig.fileExtension = fileExtension
+    }
+
+    if (alias) {
+        resolvedConfig.alias = alias
     }
 
     components.map((comp: CompInfo) => {

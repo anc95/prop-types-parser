@@ -6,10 +6,12 @@ import findAllDependencesByObj from '../utils/findAllDependencesByObj'
 import { NodePath } from 'babel-traverse'
 import * as t from 'babel-types'
 import * as _ from 'lodash'
+import * as path from 'path'
 
 const easyPropTypeModule = pathJoin(__dirname, '../utils/propTypes.js')
+const pluginPath = pathJoin(__dirname, '../../dist/src/plugins/exportPropTypes')
 const babelRegisterCode: string = `
-var exportPropTypes = require('../plugins/exportPropTypes')
+var exportPropTypes = require(\'${pluginPath}\')
 require('babel-register')({
     presets: [require('babel-preset-env'), require('babel-preset-stage-0')],
     cache: false,
@@ -32,14 +34,14 @@ require('babel-register')({
  * 将proptypes相关代码单独解析出来
  * @param propTypesPath 代码中propTypes定义所在的path
  */
-export default function(propTypesPath: NodePath, cwd: string): string {
+export default function(propTypesPath: NodePath, cwd: string, alias: object): string {
     let programAst: Program | any = {
         type: 'Program',
         body: []
     }
     const node = propTypesPath.node
     const dependencies = findAllDependencesByObj(propTypesPath.get('value'))
-    changeImportedSource(dependencies, cwd)
+    changeImportedSource(dependencies, cwd, alias)
 
     if (dependencies && dependencies.length) {
         dependencies.forEach(dep => {
@@ -49,14 +51,14 @@ export default function(propTypesPath: NodePath, cwd: string): string {
 
     programAst.body.push(transStaticPropertyToDeclare(node)) 
     const code: string = <string>transformFromAst(programAst).code
-    return babelRegisterCode + transform(code, {presets: ['babel-preset-env']}).code + 'callback && callback(_propTypes_)'
+    return babelRegisterCode + transform(code, {presets: [require('babel-preset-env'), require('babel-preset-stage-0')]}).code + 'callback && callback(_propTypes_)'
 }
 
 /**
  * 改变库的引用
  * @param dependencies require所引用的路径替换 相对到绝对, 对prop-types替换
  */
-function changeImportedSource(dependencies: NodePath[], cwd: string) {
+function changeImportedSource(dependencies: NodePath[], cwd: string, alias: object) {
     dependencies.some(dep => {
         if (t.isLiteral(dep.get('source'))) {
             const sourceName = _.get(dep, 'node.source.value')
@@ -66,7 +68,7 @@ function changeImportedSource(dependencies: NodePath[], cwd: string) {
                 )
             } else if (sourceName) {
                 dep.get('source').replaceWith(
-                    t.stringLiteral(pathJoin(cwd, sourceName))
+                    t.stringLiteral(resolveAlias(sourceName, alias, cwd))
                 )
             }
         }
@@ -91,4 +93,22 @@ function transStaticPropertyToDeclare(node: any): VariableDeclaration{
     )
 
     return declaration
+}
+/**
+ * 文件
+ * @param filePath 文件路径
+ * @param alias 文件别称配置
+ * @param dirname 所在目录
+ */
+function resolveAlias(filePath: string, alias: any, dirname: string): string {
+    if (filePath.startsWith('.')) {
+        return path.join(dirname, filePath)
+    }
+
+    for (let key of Object.keys(alias)) {
+        if (filePath.startsWith(`${key}${path.sep}`)) {
+            return path.join(alias[key], `.${filePath.substr(key.length)}`)
+        }
+    }
+    return filePath
 }

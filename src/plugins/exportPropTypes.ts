@@ -17,17 +17,15 @@ module.exports = function() {
             Program: {
                 enter(path: NodePath, state: any) {
                     dir = dirname(state.file.opts.filename)
-                },
-                exit(path: NodePath, state: any) {
-                    // if (visitedPropsTypes) {
-                    //     _.set(path, 'node.body', body.map(p => p.node))
-                    //     console.log('******************* exit **************')
-                    //     // console.log(_.get(path, 'node.body'));
-                    // }
                 }
             },
             ImportDeclaration(path: NodePath, state: any) {
                 const sourceName = _.get(path, 'node.source.value')
+
+                if (/(\.less|\.css)$/.test(sourceName)) {
+                    return path.remove()
+                }
+
                 if (sourceName === 'prop-types') {
                     path.get('source').replaceWith(
                         t.stringLiteral(easyPropTypes)
