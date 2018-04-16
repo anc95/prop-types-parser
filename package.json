@@ -1,5 +1,5 @@
 {
-  "name": "prop-types-parser",
+  "name": "react-prop-types-parser",
   "version": "1.0.0",
   "main": "index.js",
   "repository": "git@github.com:anc95/prop-types-parser.git",
