@@ -13,11 +13,9 @@ export default function(options: ParserConfig) {
 
 let i = 0
 function tryParse(result: object, keys: string[], validComponents: any, alias: object) {
-    console.log('enter')
     try {
         for (; i < keys.length; i++) {
             const key = keys[i]
-            console.log(key)
             const compConfig = validComponents[key]
             result[key] = parse(compConfig.location, alias)
         }

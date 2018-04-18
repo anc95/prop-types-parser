@@ -11,6 +11,7 @@ import * as path from 'path'
 const easyPropTypeModule = pathJoin(__dirname, '../utils/propTypes.js')
 const pluginPath = pathJoin(__dirname, '../../dist/src/plugins/exportPropTypes')
 const babelRegisterCode: string = `
+global.document = document
 var exportPropTypes = require(\'${pluginPath}\')
 require('babel-register')({
     presets: [require('babel-preset-env'), require('babel-preset-stage-0')],

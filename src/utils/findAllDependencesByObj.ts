@@ -39,7 +39,6 @@ export default function findAllDependencies(path: NodePath, visitedId?: any, dep
     _.set(path, 'visited', true)
 
     dependences.forEach(path => {
-        console.log(_.get(path, 'visited'))
         if (!_.get(path, 'visited')) {
             findAllDependencies(path, visitedId, dependences)
         }

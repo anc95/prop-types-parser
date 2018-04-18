@@ -56,7 +56,6 @@ export default function(file: string, alias: object) {
 
     const value: any = (<NodePath>propsTypesPath).get('value')
     const code = extractPropTypeCode(<NodePath>propsTypesPath, path.dirname(file), alias)
-    console.log(code)
     const comments = getJsonObjComments(value)
     const propTypes = execExtractCode(code, file)
 
@@ -98,7 +97,7 @@ function getPropTypesPath(path: NodePath): NodePath | null {
 function execExtractCode(code: string, file: string) {
     let result: any = null
     const script = new vm.Script(code)
-    const sandbox = { require: require, console, module, exports, __filename, __dirname: path.dirname(file), callback: ((res: any) => {
+    const sandbox = { document, global, require: require, console, module, exports, __filename, __dirname: path.dirname(file), callback: ((res: any) => {
         result = res
     })};
     vm.createContext(sandbox);

@@ -14,6 +14,8 @@ export interface ParserConfig {
     base?: string,
     fileExtension?: string,
     components: Array<CompInfo>,
-    alias? : Object,
-    validComponents?: Object
+    alias?: Object,
+    global?: Object,
+    validComponents?: Object,
+    resolveModule?: Object
 }
