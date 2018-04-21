@@ -15,9 +15,27 @@ parse prop-types to analysize react components props data stucture
 ```
 import { parse, parseSeries } from 'react-prop-types-parser'
 
-parse(file)
-// used for react component libriry
-parseSeries(complexOption)
+parse(file, options)
 ```
 
-### doc is pending
+### options
+```
+interface ParserConfig {
+    /**
+     * @desciption alias in code
+     * @example {'moduleA', path.join(__dirname, ''../lib/moduleA'')}
+     */
+    alias?: Object,
+    /**
+     * @description global object will be injected to runtime code, and removed when finished excuting
+     * @example { a: function () {return 'i was injected'}
+     }
+     */
+    globalObject?: Object,
+    /**
+     * @description replace the third module with your module, so we have the effective to support more prop-types-like library
+     * @example {'prop-types', path.join(__dirname, '../lib/prop-types')}
+     */
+    resolveModule?: Object
+}
+```

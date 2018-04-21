@@ -76,7 +76,6 @@ function isPropTypesJson(path: t.ObjectExpression, propTypesSpe: string): boolea
 
     return properties.some(p => {
         const calleeName = _.get(p, 'value.callee.object.name')
-        console.log(calleeName, propTypesSpe)
         return calleeName === propTypesSpe
     })
 }

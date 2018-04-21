@@ -13,7 +13,6 @@ export interface CompInfo {
 export interface ParserConfig {
     alias?: Object,
     globalObject?: Object,
-    validComponents?: Object,
     resolveModule?: Object
 }
 
