@@ -41,7 +41,7 @@ export default function(propTypesPath: NodePath, cwd: string, alias: object, res
  * @param dependencies require所引用的路径替换 相对到绝对, 对prop-types替换
  */
 function changeImportedSource(dependencies: NodePath[], cwd: string, alias: object, resolveModule: object) {
-    dependencies.some(dep => {
+    dependencies.forEach(dep => {
         if (t.isLiteral(dep.get('source'))) {
             const sourceName = _.get(dep, 'node.source.value')
             if (sourceName) {

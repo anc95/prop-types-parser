@@ -12,6 +12,8 @@ import getJsonObjComments from '../utils/getJsonObjComments'
 import * as vm from 'vm'
 import * as path from 'path'
 import { ParserConfig } from '../../types/config';
+import resolveDefaultConfig from '../utils/resolveDefaultConfig'
+import defaultConfig from './defaultConfig'
 
 const AST_PARSE_CONFIG: BabylonOptions = {
     sourceType: 'module',
@@ -35,11 +37,12 @@ const AST_PARSE_CONFIG: BabylonOptions = {
  * @param file 文件地址
  */
 export default function(file: string, config: ParserConfig) {
+    config = config || {}
     const {
         alias,
         globalObject,
         resolveModule
-    } = config
+    } = <ParserConfig>resolveDefaultConfig(defaultConfig, config)
     let classDeclarationPath: NodePath | null = null
     const content = readFileSync(file, 'utf8')
     const ast: File = parse(content, AST_PARSE_CONFIG)
@@ -62,7 +65,7 @@ export default function(file: string, config: ParserConfig) {
     const value: any = (<NodePath>propsTypesPath).get('value')
     const code = extractPropTypeCode(<NodePath>propsTypesPath, path.dirname(file), <object>alias, <object>resolveModule)
     const comments = getJsonObjComments(value)
-    const propTypes = execExtractCode(code, file)
+    const propTypes = execExtractCode(code, file, globalObject)
 
     for (let key of Object.keys(propTypes)) {
         if (comments[key] && propTypes[key]) {
@@ -99,14 +102,16 @@ function getPropTypesPath(path: NodePath): NodePath | null {
  * 执行代码, 拿到propTypes
  * @param code 代码内容为字符串
  */
-function execExtractCode(code: string, file: string) {
+function execExtractCode(code: string, file: string, globalObject: object) {
     let result: any = null
     const script = new vm.Script(code)
-    const sandbox = { document, global, require: require, console, module, exports, __filename, __dirname: path.dirname(file), callback: ((res: any) => {
+    const sandbox = { global, require: require, console, module, exports, __filename, __dirname: path.dirname(file), callback: ((res: any) => {
         result = res
     })};
+    assignToGlobal(globalObject)
     vm.createContext(sandbox);
     script.runInContext(sandbox)
+    removeFromGlobal(globalObject)
     
     return result
 }

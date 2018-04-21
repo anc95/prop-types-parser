@@ -6,7 +6,9 @@
 export default function resolveDefaultConfig(defaultConfig: object, config: object): object {
     for (let key of Object.keys(defaultConfig)) {
         if (config.hasOwnProperty(key) && config[key]) {
-            if (typeof config[key] === 'object') {
+            if (config[key] instanceof Array) {
+                defaultConfig[key] = defaultConfig[key].concat(config[key])
+            } else if (typeof config[key] === 'object') {
                 defaultConfig[key] = Object.assign({}, defaultConfig[key], config[key])
             } else {
                 defaultConfig[key] = config[key]

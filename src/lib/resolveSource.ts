@@ -11,7 +11,7 @@ import resolveDefaultConfig from '../utils/resolveDefaultConfig'
 import * as _ from 'lodash'
 import * as path from 'path'
 
-export default function resolveSource(source: string | ComponentSource): null | string | CompInfo[] {
+export default function resolveSource(source: string | ComponentSource): null | string | object {
     if (typeof source === 'string') {
         return resolveSourceFile(source)
     }
@@ -33,7 +33,7 @@ export default function resolveSource(source: string | ComponentSource): null | 
         }
     })
 
-    return components
+    return getValidComponents(components)
 }
 
 /**
@@ -84,4 +84,17 @@ function resolveSourceFile(source: string): string {
     } else {
         throw new Error(`${source} is not a file`)
     }
+}
+
+function getValidComponents(components: CompInfo[]) {
+    const validComponents = {}
+
+    components.forEach(comp => {
+        if (comp[1] && comp[1].location) {
+            comp[1].cwd = path.dirname(comp[1].location)
+            validComponents[comp[0]] = comp[1]
+        }
+    })
+
+    return validComponents
 }

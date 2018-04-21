@@ -1,4 +1,5 @@
-import { JSDOM } from 'jsdom'
+const jsdom = require('jsdom')
+const JSDOM = jsdom.JSDOM
 
 const dom = new JSDOM(
     `<p>Hello, world</p>`,
@@ -7,4 +8,4 @@ const dom = new JSDOM(
   
 const document = dom.window.document;
 
-export default document
+module.exports = document
