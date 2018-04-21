@@ -5,9 +5,9 @@ import * as _ from 'lodash'
  * 读取josn中的注释
  * @param path json代码的path
  */
-export default function(path: ObjectExpression): any[] {
+export default function(path: ObjectExpression): object {
     const properties = _.get(path, 'node.properties')
-    const result: any[] = []
+    const result: object = {}
 
     if (!properties || properties.length === 0) {
         return result

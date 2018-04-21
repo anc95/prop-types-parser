@@ -3,15 +3,16 @@ import * as _ from 'lodash'
 import { dirname } from 'path'
 import * as path from 'path'
 import * as t from 'babel-types'
-import { NodePath } from 'babel-traverse';
+import { NodePath } from 'babel-traverse'
+import ignore from '../utils/ignore'
+import getJsonObjComments from '../utils/getJsonObjComments'
+import { addComments } from '../lib/comments'
 
 const easyPropTypes = path.join(__dirname, '../utils/propTypes.js')
 
 module.exports = function() {
-    // let visitedPropsTypes: boolean = false
-    // let dependencies = []
-    // let body: NodePath[] = []
     let dir = ''
+    let propTypesSpe: null | string = null
     return {
         visitor: {
             Program: {
@@ -21,16 +22,15 @@ module.exports = function() {
             },
             ImportDeclaration(path: NodePath, state: any) {
                 const sourceName = _.get(path, 'node.source.value')
-
-                if (/(\.less|\.css)$/.test(sourceName)) {
+                if (/(\.less|\.css|\.sass|\.png|\.jpg|\.svg|\.gif)$/.test(sourceName)) {
                     return path.remove()
                 }
 
                 if (sourceName === 'prop-types') {
+                    propTypesSpe = _.get(path, 'node.specifiers.0.local.name')
                     path.get('source').replaceWith(
                         t.stringLiteral(easyPropTypes)
                     )
-                    // visitedPropsTypes = true
                 } else {
                     const alias = _.get(state, 'opts.alias')
                     if (!alias) {
@@ -41,20 +41,14 @@ module.exports = function() {
                     )
                 }
             },
-            ExportDefaultDeclaration(path: NodePath) {
-                // if (!visitedPropsTypes) {
-                //     return false
-                // }
-
-                // const declaration = path.get('declaration')
-                // if (t.isObjectExpression(declaration)) {
-                //     dependencies = findAllDependencesByObj(declaration)
-                //     console.log(dependencies.length)
-                //     if (dependencies.length) {
-                //         body = _.concat(body, dependencies, path)
-                //     }
-                // }
-            }
+            ObjectExpression(path: t.ObjectExpression) {
+                if (propTypesSpe && isPropTypesJson(path, propTypesSpe)) {
+                    addComments(getJsonObjComments(path))
+                } else {
+                    return false
+                }
+            },
+            ExportDefaultDeclaration: ignore
         }
     }
 };
@@ -71,4 +65,22 @@ function resolveAlias(filePath: string, alias: any, dirname: string): string {
     }
 
     return filePath
+}
+
+function isPropTypesJson(path: t.ObjectExpression, propTypesSpe: string): boolean {
+    const properties = _.get(path, 'node.properties')
+
+    if (!(properties instanceof Array)) {
+        return false
+    }
+
+    return properties.some(p => {
+        const calleeName = _.get(p, 'value.callee.object.name')
+        console.log(calleeName, propTypesSpe)
+        return calleeName === propTypesSpe
+    })
+}
+
+function assignComments() {
+
 }

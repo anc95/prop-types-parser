@@ -9,7 +9,7 @@ import * as _ from 'lodash'
 import * as path from 'path'
 
 const easyPropTypeModule = pathJoin(__dirname, '../utils/propTypes.js')
-const pluginPath = pathJoin(__dirname, '../../dist/src/plugins/exportPropTypes')
+const pluginPath = pathJoin(__dirname, '../plugins/exportPropTypes')
 
 /**
  * 将proptypes相关代码单独解析出来

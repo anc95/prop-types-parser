@@ -14,6 +14,7 @@ import * as path from 'path'
 import { ParserConfig } from '../../types/config';
 import resolveDefaultConfig from '../utils/resolveDefaultConfig'
 import defaultConfig from './defaultConfig'
+import { addComments, clearComments, default as comments } from './comments'
 
 const AST_PARSE_CONFIG: BabylonOptions = {
     sourceType: 'module',
@@ -64,14 +65,16 @@ export default function(file: string, config: ParserConfig) {
 
     const value: any = (<NodePath>propsTypesPath).get('value')
     const code = extractPropTypeCode(<NodePath>propsTypesPath, path.dirname(file), <object>alias, <object>resolveModule)
-    const comments = getJsonObjComments(value)
-    const propTypes = execExtractCode(code, file, globalObject)
+    addComments(getJsonObjComments(value))
+    const propTypes = execExtractCode(code, file, <object>globalObject)
 
     for (let key of Object.keys(propTypes)) {
         if (comments[key] && propTypes[key]) {
             propTypes[key].description = comments[key]
         }
     }
+
+    clearComments()
     
     return propTypes
 }
