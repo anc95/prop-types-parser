@@ -10,39 +10,20 @@ import * as path from 'path'
 
 const easyPropTypeModule = pathJoin(__dirname, '../utils/propTypes.js')
 const pluginPath = pathJoin(__dirname, '../../dist/src/plugins/exportPropTypes')
-const babelRegisterCode: string = `
-global.document = document
-var exportPropTypes = require(\'${pluginPath}\')
-require('babel-register')({
-    presets: [require('babel-preset-env'), require('babel-preset-stage-0')],
-    cache: false,
-    plugins: [
-        // require('babel-plugin-transform-object-rest-spread'),
-        [
-            exportPropTypes,
-            {
-                alias: {
-                    '@befe': '/Users/anchao01/code/erp-comp-helper/node_modules/@befe'
-                }
-            }
-        ]
-    ],
-    ignore: /node_modules\\/(?!@befe)/
-})
-`
 
 /**
  * 将proptypes相关代码单独解析出来
  * @param propTypesPath 代码中propTypes定义所在的path
  */
-export default function(propTypesPath: NodePath, cwd: string, alias: object): string {
+export default function(propTypesPath: NodePath, cwd: string, alias: object, resolveModule: object): string {
+    const babelRegisterCode = generateBabelRegisterCode(alias, resolveModule)
     let programAst: Program | any = {
         type: 'Program',
         body: []
     }
     const node = propTypesPath.node
     const dependencies = findAllDependencesByObj(propTypesPath.get('value'))
-    changeImportedSource(dependencies, cwd, alias)
+    changeImportedSource(dependencies, cwd, alias, resolveModule)
 
     if (dependencies && dependencies.length) {
         dependencies.forEach(dep => {
@@ -59,17 +40,13 @@ export default function(propTypesPath: NodePath, cwd: string, alias: object): st
  * 改变库的引用
  * @param dependencies require所引用的路径替换 相对到绝对, 对prop-types替换
  */
-function changeImportedSource(dependencies: NodePath[], cwd: string, alias: object) {
+function changeImportedSource(dependencies: NodePath[], cwd: string, alias: object, resolveModule: object) {
     dependencies.some(dep => {
         if (t.isLiteral(dep.get('source'))) {
             const sourceName = _.get(dep, 'node.source.value')
-            if (sourceName === 'prop-types') {
+            if (sourceName) {
                 dep.get('source').replaceWith(
-                    t.stringLiteral(easyPropTypeModule)
-                )
-            } else if (sourceName) {
-                dep.get('source').replaceWith(
-                    t.stringLiteral(resolveAlias(sourceName, alias, cwd))
+                    t.stringLiteral(resolveSource(sourceName, alias, resolveModule, cwd))
                 )
             }
         }
@@ -96,6 +73,23 @@ function transStaticPropertyToDeclare(node: any): VariableDeclaration{
     return declaration
 }
 /**
+ * source的绝对地址
+ * @param sourceName 引用模块地址
+ * @param alias alias配置
+ * @param resolveModule resolveModule配置
+ * @param cwd 
+ */
+function resolveSource(sourceName: string, alias: object, resolveModule: object, cwd: string): string {
+    for (let key of Object.keys(resolveModule)) {
+        if (key === sourceName) {
+            return resolveModule[key]
+        }
+    }
+
+    return resolveAlias(sourceName, alias, cwd)
+}
+
+/**
  * 文件
  * @param filePath 文件路径
  * @param alias 文件别称配置
@@ -111,5 +105,27 @@ function resolveAlias(filePath: string, alias: any, dirname: string): string {
             return path.join(alias[key], `.${filePath.substr(key.length)}`)
         }
     }
+
     return filePath
+}
+
+function generateBabelRegisterCode(alias: object, resolveModule: object) {
+    return`
+        var exportPropTypes = require(\'${pluginPath}\')
+        require('babel-register')({
+            presets: [require('babel-preset-env'), require('babel-preset-stage-0')],
+            cache: false,
+            plugins: [
+                // require('babel-plugin-transform-object-rest-spread'),
+                [
+                    exportPropTypes,
+                    {
+                        alias: ${JSON.stringify(alias)},
+                        resolveModule: ${JSON.stringify(resolveModule)}
+                    }
+                ]
+            ],
+            ignore: /node_modules\\/(?!@befe)/
+        })
+    `
 }

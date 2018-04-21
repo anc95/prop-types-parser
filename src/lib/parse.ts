@@ -1,17 +1,17 @@
 import {
     readFileSync,
-    writeFileSync
 } from 'fs'
-import { execSync } from 'child_process'
 import {parse, BabylonOptions} from 'babylon'
 import { File, ClassProperty } from 'babel-types'
 import resolveExportedComponent from './resolveExportedComponent'
 import traverse, { NodePath } from 'babel-traverse'
 import extractPropTypeCode from './extractPropTypeCode'
+import { assignToGlobal, removeFromGlobal } from '../utils/opreateGlobal'
 import * as t from 'babel-types'
 import getJsonObjComments from '../utils/getJsonObjComments'
 import * as vm from 'vm'
 import * as path from 'path'
+import { ParserConfig } from '../../types/config';
 
 const AST_PARSE_CONFIG: BabylonOptions = {
     sourceType: 'module',
@@ -34,7 +34,12 @@ const AST_PARSE_CONFIG: BabylonOptions = {
  * 解析出props依赖, 遵循react-docgen格式
  * @param file 文件地址
  */
-export default function(file: string, alias: object) {
+export default function(file: string, config: ParserConfig) {
+    const {
+        alias,
+        globalObject,
+        resolveModule
+    } = config
     let classDeclarationPath: NodePath | null = null
     const content = readFileSync(file, 'utf8')
     const ast: File = parse(content, AST_PARSE_CONFIG)
@@ -55,7 +60,7 @@ export default function(file: string, alias: object) {
     }
 
     const value: any = (<NodePath>propsTypesPath).get('value')
-    const code = extractPropTypeCode(<NodePath>propsTypesPath, path.dirname(file), alias)
+    const code = extractPropTypeCode(<NodePath>propsTypesPath, path.dirname(file), <object>alias, <object>resolveModule)
     const comments = getJsonObjComments(value)
     const propTypes = execExtractCode(code, file)
 

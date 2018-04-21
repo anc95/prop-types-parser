@@ -11,11 +11,14 @@ export interface CompInfo {
 }
 
 export interface ParserConfig {
-    base?: string,
-    fileExtension?: string,
-    components: Array<CompInfo>,
     alias?: Object,
     globalObject?: Object,
     validComponents?: Object,
     resolveModule?: Object
+}
+
+export interface ComponentSource {
+    base?: string,
+    fileExtension?: string,
+    components: Array<CompInfo>,
 }
