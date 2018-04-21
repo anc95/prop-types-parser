@@ -3,7 +3,7 @@
  */
 import { ParserConfig } from '../../types/config'
 import * as path from 'path'
-import document from '../utils/fake-document'
+import * as document from '../utils/fake-document'
 
 export default <ParserConfig>{
     alias: {},

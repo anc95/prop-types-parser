@@ -1,4 +1,4 @@
-import { ParserConfig, ComponentSource } from '../../types/config'
+import { ParserConfig, ComponentSource, CompConfig } from '../../types/config'
 import resolveSource from './resolveSource'
 import parse from './parse'
 
@@ -13,14 +13,15 @@ export default function(source: ComponentSource, config: ParserConfig) {
 
 let i = 0
 function tryParse(result: object, keys: string[], validComponents: any, config: object) {
+    let compConfig = {}
     try {
         for (; i < keys.length; i++) {
             const key = keys[i]
-            const compConfig = validComponents[key]
-            result[key] = parse(compConfig.location, config)
+            compConfig = validComponents[key]
+            result[key] = parse((<CompConfig>compConfig).location, config)
         }
     } catch (e) {
-        console.log(e)
+        console.log((<CompConfig>compConfig).location, e)
         i++
         tryParse(result, keys, validComponents, config)
     }
