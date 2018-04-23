@@ -27,6 +27,7 @@ export default function findAllDependencies(path: NodePath, visitedId?: any, dep
     }
 
     path.traverse({
+        SpreadElement: handleSpreadProperty.bind(null, visitedId, dependences),
         MemberExpression: handleMemberExpression.bind(null, visitedId, dependences),
         SpreadProperty: handleSpreadProperty.bind(null, visitedId, dependences),
         Property: handleProperty.bind(null, visitedId, dependences),

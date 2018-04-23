@@ -31,12 +31,16 @@ export default class {
         return Type('node')
     }
 
+    static get any() {
+        return Type('any')
+    }
+
     static oneOf(params) {
         return Type('enum', params)
     }
 
     static oneOfType(params) {
-        return Type('oneOfType')
+        return Type('union', params)
     }
 
     static shape(params) {
@@ -62,7 +66,7 @@ function Type(type, params) {
         }
     })
 
-    if (type === 'enum') {
+    if (type === 'enum' || type === 'union') {
         returnType.value = params.map(p => {
             return {
                 value: p
