@@ -10,7 +10,6 @@
  */
 import * as t from 'babel-types'
 import * as _ from 'lodash'
-import ignore from './ignore'
 import findIndentifierDeclaration from './findIndentifierDeclaration'
 import { NodePath } from 'babel-traverse';
 

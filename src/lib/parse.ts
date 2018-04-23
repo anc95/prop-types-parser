@@ -67,7 +67,6 @@ export default function(file: string, config: ParserConfig) {
     const code = extractPropTypeCode(<NodePath>propsTypesPath, path.dirname(file), <object>alias, <object>resolveModule)
     addComments(getJsonObjComments(value))
     const propTypes = execExtractCode(code, file, <object>globalObject)
-
     for (let key of Object.keys(propTypes)) {
         if (comments[key] && propTypes[key]) {
             propTypes[key].description = comments[key]

@@ -3,7 +3,9 @@ let comments = {}
 export default comments
 
 export function clearComments() {
-    comments = {}
+    for (let key of Object.keys(comments)) {
+        delete comments[key]
+    }
 }
 
 export function addComments(newComments: object) {

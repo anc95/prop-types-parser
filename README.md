@@ -8,7 +8,7 @@ parse prop-types to analysize react components props data stucture
 
 `prop-types-parser`, combines ast and runtime code, it is more flexible and stronger
 ## install
-`npm install prop-types-parser`
+`npm install react-prop-types-parser`
 
 ## ussage
 

@@ -79,7 +79,3 @@ function isPropTypesJson(path: t.ObjectExpression, propTypesSpe: string): boolea
         return calleeName === propTypesSpe
     })
 }
-
-function assignComments() {
-
-}
