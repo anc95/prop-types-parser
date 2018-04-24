@@ -1,7 +1,7 @@
 import {
     readFileSync,
 } from 'fs'
-import {parse, BabylonOptions} from 'babylon'
+import { parse } from 'babylon'
 import { File, ClassProperty } from 'babel-types'
 import resolveExportedComponent from './resolveExportedComponent'
 import traverse, { NodePath } from 'babel-traverse'
@@ -11,13 +11,13 @@ import * as t from 'babel-types'
 import getJsonObjComments from '../utils/getJsonObjComments'
 import * as vm from 'vm'
 import * as path from 'path'
-import { ParserConfig } from '../../types/config';
+import { ParserConfig, BabelConfig } from '../../types/config';
 import resolveDefaultConfig from '../utils/resolveDefaultConfig'
 import defaultConfig from './defaultConfig'
 import { addComments, clearComments, default as comments } from './comments'
 import * as exportPropTypes from '../plugins/exportPropTypes'
 
-const AST_PARSE_CONFIG: BabylonOptions = {
+const AST_PARSE_CONFIG: any = {
     sourceType: 'module',
     plugins: [
         'classProperties',
@@ -89,8 +89,6 @@ function getPropTypesPath(path: NodePath): NodePath | null {
                 && node.key.name === 'propTypes'
             ) {
                 propTypesPath = path
-            } else {
-                return false
             }
         }
     })
@@ -126,7 +124,7 @@ function generateBabelConfig(config: ParserConfig) {
         }
     ]
 
-    const babelConfig = config.babelConfig
+    const babelConfig = <BabelConfig>config.babelConfig
     babelConfig.plugins.push(exportPropTypesPlugin)
     return babelConfig
 }

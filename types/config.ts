@@ -1,5 +1,3 @@
-import ignore from "../src/utils/ignore";
-
 export type CompList = Array<Object>
 
 export interface CompConfig {
@@ -26,6 +24,6 @@ export interface ComponentSource {
 }
 
 export interface BabelConfig {
-    plugins?: any[],
+    plugins: any[],
     ignore?: RegExp | string[]
 }

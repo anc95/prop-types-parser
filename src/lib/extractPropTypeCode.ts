@@ -1,8 +1,7 @@
-import {join as pathJoin} from 'path'
-import {transformFromAst, Node, transform} from 'babel-core'
+import {transformFromAst, transform} from 'babel-core'
 import { Program, VariableDeclaration } from 'babel-types'
 import findAllDependencesByObj from '../utils/findAllDependencesByObj'
-import { ParserConfig, BabelConfig } from '../../types/config'; 
+import { ParserConfig } from '../../types/config'; 
 import { NodePath } from 'babel-traverse'
 import * as t from 'babel-types'
 import * as _ from 'lodash'

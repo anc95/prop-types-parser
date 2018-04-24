@@ -16,6 +16,7 @@ module.exports = function() {
     return {
         visitor: {
             Program: {
+                // @ts-ignore
                 enter(path: NodePath, state: any) {
                     dir = dirname(state.file.opts.filename)
                 }
@@ -41,6 +42,7 @@ module.exports = function() {
                     )
                 }
             },
+            // @ts-ignore
             ObjectExpression(path: t.ObjectExpression) {
                 if (propTypesSpe && isPropTypesJson(path, propTypesSpe)) {
                     addComments(getJsonObjComments(path))
