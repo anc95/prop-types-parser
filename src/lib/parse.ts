@@ -107,7 +107,7 @@ function getPropTypesPath(path: NodePath): NodePath | null {
 function execExtractCode(code: string, file: string, globalObject: object) {
     let result: any = null
     const script = new vm.Script(code)
-    const sandbox = { global, require: require, console, module, exports, __filename, __dirname: path.dirname(file), callback: ((res: any) => {
+    const sandbox = { global, require: require, console, module, exports, __filename: file, __dirname: path.dirname(file), callback: ((res: any) => {
         result = res
     })};
     assignToGlobal(globalObject)
