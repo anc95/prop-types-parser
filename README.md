@@ -1,4 +1,6 @@
 # prop-types-parser
+![](https://api.travis-ci.org/anc95/prop-types-parser.svg?branch=master)
+![](https://img.shields.io/npm/dm/react-prop-types-parser.svg)
 
 parse prop-types to analysize react components props data stucture
 
