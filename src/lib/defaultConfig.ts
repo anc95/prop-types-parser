@@ -16,6 +16,7 @@ export default <ParserConfig>{
     babelConfig: {
         presets: [require('babel-preset-env'), require('babel-preset-stage-0')],
         cache: false,
-        plugins: []
+        plugins: [],
+        ignore: /node_modules\/(?!@befe)/
     }
 }

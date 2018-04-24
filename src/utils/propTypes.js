@@ -1,10 +1,3 @@
-interface ReturnType {
-    type: string,
-    require: boolean,
-    description: string,
-    value?: any[]
-}
-
 export default class {
     static get bool() {
         return Type('bool')
@@ -42,15 +35,15 @@ export default class {
         return Type('any')
     }
 
-    static oneOf(params: any[]) {
+    static oneOf(params) {
         return Type('enum', params)
     }
 
-    static oneOfType(params: any[]) {
+    static oneOfType(params) {
         return Type('union', params)
     }
 
-    static shape(params: any[]) {
+    static shape(params) {
         return Type('shape')
     }
 
@@ -59,7 +52,7 @@ export default class {
     }
 }
 
-function Type(type: string, params?: any[]) {
+function Type(type, params) {
     const returnType = {
         type,
         require: false,
@@ -74,7 +67,7 @@ function Type(type: string, params?: any[]) {
     })
 
     if (type === 'enum' || type === 'union') {
-        (<ReturnType>returnType).value = (<any[]>params).map(p => {
+        returnType.value = params.map(p => {
             return {
                 value: p
             }

@@ -15,7 +15,7 @@ import { ParserConfig } from '../../types/config';
 import resolveDefaultConfig from '../utils/resolveDefaultConfig'
 import defaultConfig from './defaultConfig'
 import { addComments, clearComments, default as comments } from './comments'
-import exportPropTypes from '../utils/propTypes'
+import * as exportPropTypes from '../plugins/exportPropTypes'
 
 const AST_PARSE_CONFIG: BabylonOptions = {
     sourceType: 'module',
@@ -121,8 +121,8 @@ function generateBabelConfig(config: ParserConfig) {
     const exportPropTypesPlugin = [
         exportPropTypes,
         {
-            alias: JSON.stringify(config.alias),
-            resolveModule: JSON.stringify(config.resolveModule)
+            alias: config.alias,
+            resolveModule: config.resolveModule
         }
     ]
 
