@@ -107,7 +107,16 @@ function saveDependecies(path: any, id: string, visitedId: any, dependences: Nod
     }
 
     const foundDependencyPath = findIndentifierDeclaration(path, id)
+
     if (foundDependencyPath) {
+        if (t.isImportDeclaration(foundDependencyPath)) {
+            const specifiers = _.get(foundDependencyPath, 'node.specifiers')
+            specifiers && specifiers.forEach((sp: any) => {
+                const id = _.get(sp, 'local.name')
+                visitedId[id] = true
+            })
+        }
+
         visitedId[id] = true
         dependences.push(foundDependencyPath)
     }
