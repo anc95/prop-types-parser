@@ -15,6 +15,7 @@ import { ParserConfig } from '../../types/config';
 import resolveDefaultConfig from '../utils/resolveDefaultConfig'
 import defaultConfig from './defaultConfig'
 import { addComments, clearComments, default as comments } from './comments'
+import exportPropTypes from '../utils/propTypes'
 
 const AST_PARSE_CONFIG: BabylonOptions = {
     sourceType: 'module',
@@ -39,11 +40,8 @@ const AST_PARSE_CONFIG: BabylonOptions = {
  */
 export default function(file: string, config: ParserConfig) {
     config = config || {}
-    const {
-        alias,
-        globalObject,
-        resolveModule
-    } = <ParserConfig>resolveDefaultConfig(defaultConfig, config)
+    config = <ParserConfig>resolveDefaultConfig(defaultConfig, config)
+
     let classDeclarationPath: NodePath | null = null
     const content = readFileSync(file, 'utf8')
     const ast: File = parse(content, AST_PARSE_CONFIG)
@@ -64,9 +62,9 @@ export default function(file: string, config: ParserConfig) {
     }
 
     const value: any = (<NodePath>propsTypesPath).get('value')
-    const code = extractPropTypeCode(<NodePath>propsTypesPath, path.dirname(file), <object>alias, <object>resolveModule)
+    const code = extractPropTypeCode(<NodePath>propsTypesPath, path.dirname(file), <ParserConfig>config)
     addComments(getJsonObjComments(value))
-    const propTypes = execExtractCode(code, file, <object>globalObject)
+    const propTypes = execExtractCode(code, file, config)
     for (let key of Object.keys(propTypes)) {
         if (comments[key] && propTypes[key]) {
             propTypes[key].description = comments[key]
@@ -104,16 +102,31 @@ function getPropTypesPath(path: NodePath): NodePath | null {
  * 执行代码, 拿到propTypes
  * @param code 代码内容为字符串
  */
-function execExtractCode(code: string, file: string, globalObject: object) {
+function execExtractCode(code: string, file: string, config: ParserConfig) {
     let result: any = null
     const script = new vm.Script(code)
     const sandbox = { global, require: require, console, module, exports, __filename: file, __dirname: path.dirname(file), callback: ((res: any) => {
         result = res
     })};
-    assignToGlobal(globalObject)
+    (<object>config.globalObject)['__babelConfig__'] = generateBabelConfig(config)
+    assignToGlobal(<object>config.globalObject)
     vm.createContext(sandbox);
     script.runInContext(sandbox)
-    removeFromGlobal(globalObject)
+    removeFromGlobal(<object>config.globalObject)
     
     return result
+}
+
+function generateBabelConfig(config: ParserConfig) {
+    const exportPropTypesPlugin = [
+        exportPropTypes,
+        {
+            alias: JSON.stringify(config.alias),
+            resolveModule: JSON.stringify(config.resolveModule)
+        }
+    ]
+
+    const babelConfig = config.babelConfig
+    babelConfig.plugins.push(exportPropTypesPlugin)
+    return babelConfig
 }

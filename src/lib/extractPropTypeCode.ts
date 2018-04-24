@@ -1,29 +1,29 @@
 import {join as pathJoin} from 'path'
 import {transformFromAst, Node, transform} from 'babel-core'
-import {BabylonOptions} from 'babylon'
 import { Program, VariableDeclaration } from 'babel-types'
 import findAllDependencesByObj from '../utils/findAllDependencesByObj'
+import { ParserConfig, BabelConfig } from '../../types/config'; 
 import { NodePath } from 'babel-traverse'
 import * as t from 'babel-types'
 import * as _ from 'lodash'
 import * as path from 'path'
 
-const easyPropTypeModule = pathJoin(__dirname, '../utils/propTypes.js')
-const pluginPath = pathJoin(__dirname, '../plugins/exportPropTypes')
+const babelRegisterCode = `
+    require('babel-register')(global.__babelConfig__)
+`
 
 /**
  * 将proptypes相关代码单独解析出来
  * @param propTypesPath 代码中propTypes定义所在的path
  */
-export default function(propTypesPath: NodePath, cwd: string, alias: object, resolveModule: object): string {
-    const babelRegisterCode = generateBabelRegisterCode(alias, resolveModule)
+export default function(propTypesPath: NodePath, cwd: string, config: ParserConfig): string {
     let programAst: Program | any = {
         type: 'Program',
         body: []
     }
     const node = propTypesPath.node
     const dependencies = findAllDependencesByObj(propTypesPath.get('value'))
-    changeImportedSource(dependencies, cwd, alias, resolveModule)
+    changeImportedSource(dependencies, cwd, <object>config.alias, <object>config.resolveModule)
 
     if (dependencies && dependencies.length) {
         dependencies.forEach(dep => {
@@ -33,7 +33,7 @@ export default function(propTypesPath: NodePath, cwd: string, alias: object, res
 
     programAst.body.push(transStaticPropertyToDeclare(node)) 
     const code: string = <string>transformFromAst(programAst).code
-    return babelRegisterCode + transform(code, {presets: [require('babel-preset-env'), require('babel-preset-stage-0')]}).code + 'callback && callback(_propTypes_)'
+    return babelRegisterCode + <string>transform(code, {presets: [require('babel-preset-env'), require('babel-preset-stage-0')]}).code + 'callback && callback(_propTypes_)'
 }
 
 /**
@@ -107,25 +107,4 @@ function resolveAlias(filePath: string, alias: any, dirname: string): string {
     }
 
     return filePath
-}
-
-function generateBabelRegisterCode(alias: object, resolveModule: object) {
-    return`
-        var exportPropTypes = require(\'${pluginPath}\')
-        require('babel-register')({
-            presets: [require('babel-preset-env'), require('babel-preset-stage-0')],
-            cache: false,
-            plugins: [
-                // require('babel-plugin-transform-object-rest-spread'),
-                [
-                    exportPropTypes,
-                    {
-                        alias: ${JSON.stringify(alias)},
-                        resolveModule: ${JSON.stringify(resolveModule)}
-                    }
-                ]
-            ],
-            ignore: /node_modules\\/(?!@befe)/
-        })
-    `
 }

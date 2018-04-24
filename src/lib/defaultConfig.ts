@@ -12,5 +12,10 @@ export default <ParserConfig>{
     },
     globalObject: {
         document
+    },
+    babelConfig: {
+        presets: [require('babel-preset-env'), require('babel-preset-stage-0')],
+        cache: false,
+        plugins: []
     }
 }

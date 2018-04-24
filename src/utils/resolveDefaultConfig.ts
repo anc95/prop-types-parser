@@ -9,7 +9,7 @@ export default function resolveDefaultConfig(defaultConfig: object, config: obje
             if (config[key] instanceof Array) {
                 defaultConfig[key] = defaultConfig[key].concat(config[key])
             } else if (typeof config[key] === 'object') {
-                defaultConfig[key] = Object.assign({}, defaultConfig[key], config[key])
+                defaultConfig[key] = resolveDefaultConfig(defaultConfig[key], config[key])
             } else {
                 defaultConfig[key] = config[key]
             }
