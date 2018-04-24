@@ -1,6 +1,6 @@
 {
   "name": "react-prop-types-parser",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "main": "dist/src/index.js",
   "repository": "git@github.com:anc95/prop-types-parser.git",
   "author": "anchao",
@@ -10,7 +10,8 @@
   },
   "scripts": {
     "dev": "tsc -w",
-    "build": "rm -rf dist && tsc"
+    "build": "rm -rf dist && tsc",
+    "publish": "npm run build && npm publish"
   },
   "devDependencies": {
     "@types/babel-core": "^6.25.3",

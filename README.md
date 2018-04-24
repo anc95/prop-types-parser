@@ -36,6 +36,10 @@ interface ParserConfig {
      * @description replace the third module with your module, so we have the effective to support more prop-types-like library
      * @example {'prop-types', path.join(__dirname, '../lib/prop-types')}
      */
-    resolveModule?: Object
+    resolveModule?: Object,
+    /**
+     * @description babel config used to run the code depended by the main component entry
+     *
+    babelConfig?: Object
 }
 ```
