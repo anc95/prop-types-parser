@@ -6,7 +6,7 @@ parse prop-types to analysize react components props data stucture
 
 ## why not [react-docgen](https://github.com/reactjs/react-docgen)
 
-[react-docgen](https://github.com/reactjs/react-docgen) is based on ast, and only based ast, so it is hard to analysize some runtime code, such as `ONECOMPONENT.PropTypes` is imported form a module or is produce by a runtime function
+[react-docgen](https://github.com/reactjs/react-docgen) is based on ast, and only based ast, so it is hard to analysize some runtime code, such as `ONECOMPONENT.PropTypes` is imported form a module or is produced by a runtime function
 
 `prop-types-parser`, combines ast and runtime code, it is more flexible and stronger
 ## install
@@ -25,7 +25,7 @@ parse(file, options)
 interface ParserConfig {
     /**
      * @desciption alias in code
-     * @example {'moduleA', path.join(__dirname, ''../lib/moduleA'')}
+     * @example {'@module', path.join(__dirname, ''../lib/@module'')}
      */
     alias?: Object,
     /**
@@ -35,13 +35,14 @@ interface ParserConfig {
      */
     globalObject?: Object,
     /**
-     * @description replace the third module with your module, so we have the effective to support more prop-types-like library
+     * @description replace the third module with your module, so we have the effort to support more prop-types-like library
      * @example {'prop-types', path.join(__dirname, '../lib/prop-types')}
      */
     resolveModule?: Object,
     /**
      * @description babel config used to run the code depended by the main component entry
      *
+     */
     babelConfig?: Object
 }
 ```
