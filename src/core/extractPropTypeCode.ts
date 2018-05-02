@@ -15,13 +15,18 @@ const babelRegisterCode = `
  * 将proptypes相关代码单独解析出来
  * @param propTypesPath 代码中propTypes定义所在的path
  */
-export default function(propTypesPath: NodePath, cwd: string, config: ParserConfig): string {
+export default function(propTypesPath: NodePath, defaultPropsPath: NodePath, cwd: string, config: ParserConfig): string {
     let programAst: Program | any = {
         type: 'Program',
         body: []
     }
     const node = propTypesPath.node
-    const dependencies = findAllDependencesByObj(propTypesPath.get('value'))
+    const dependencies = _.uniq(
+        findAllDependencesByObj(propTypesPath.get('value'))
+        .concat(
+            findAllDependencesByObj(defaultPropsPath.get('value'))
+        )
+    )
     changeImportedSource(dependencies, cwd, <object>config.alias, <object>config.resolveModule)
 
     if (dependencies && dependencies.length) {
@@ -30,9 +35,10 @@ export default function(propTypesPath: NodePath, cwd: string, config: ParserConf
         })
     }
 
-    programAst.body.push(transStaticPropertyToDeclare(node)) 
+    programAst.body.push(transStaticPropertyToDeclare(node, '_propTypes_'))
+    programAst.body.push(transStaticPropertyToDeclare(defaultPropsPath.node, '_defaultProps_')) 
     const code: string = <string>transformFromAst(programAst).code
-    return babelRegisterCode + <string>transform(code, {presets: [require('babel-preset-env'), require('babel-preset-stage-0')]}).code + 'callback && callback(_propTypes_)'
+    return babelRegisterCode + <string>transform(code, {presets: [require('babel-preset-env'), require('babel-preset-stage-0')]}).code + 'callback && callback(_propTypes_, _defaultProps_)'
 }
 
 /**
@@ -56,14 +62,14 @@ function changeImportedSource(dependencies: NodePath[], cwd: string, alias: obje
  * 去除可能存在的static propTypes中的static
  * @param node 
  */
-function transStaticPropertyToDeclare(node: any): VariableDeclaration{
+function transStaticPropertyToDeclare(node: any, name: string): VariableDeclaration{
     node.static = false
 
     const declaration: VariableDeclaration = t.variableDeclaration(
         'var',
         [
             t.variableDeclarator(
-                t.identifier('_propTypes_'),
+                t.identifier(name),
                 node.value
             )
         ]
@@ -71,6 +77,7 @@ function transStaticPropertyToDeclare(node: any): VariableDeclaration{
 
     return declaration
 }
+
 /**
  * source的绝对地址
  * @param sourceName 引用模块地址

@@ -1,2 +1,2 @@
-export { default as parse } from './lib/parse'
-export { default as  parseSeries } from './lib/parseSeries'
+export { default as parse } from './core/parse'
+export { default as  parseSeries } from './core/parseSeries'

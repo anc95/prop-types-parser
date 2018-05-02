@@ -56,13 +56,14 @@ export default function(file: string, config: ParserConfig) {
     }
 
     const propsTypesPath = getPropTypesPath(classDeclarationPath)
+    const defaultPropsPath = getDefaultPropsPath(classDeclarationPath)
 
     if (!propsTypesPath) {
         throw new Error(`cannot find proptypes defination in ${file}`)
     }
 
     const value: any = (<NodePath>propsTypesPath).get('value')
-    const code = extractPropTypeCode(<NodePath>propsTypesPath, path.dirname(file), <ParserConfig>config)
+    const code = extractPropTypeCode(<NodePath>propsTypesPath, <NodePath>defaultPropsPath, path.dirname(file), <ParserConfig>config)
     addComments(getJsonObjComments(value))
     const propTypes = execExtractCode(code, file, config)
     for (let key of Object.keys(propTypes)) {
@@ -96,6 +97,23 @@ function getPropTypesPath(path: NodePath): NodePath | null {
     return propTypesPath
 }
 
+// get path of defaultProps
+function getDefaultPropsPath(path: NodePath): NodePath | null {
+    let defaultProps: NodePath | null = null
+    path.traverse({
+        ClassProperty: function(path) {
+            const node = <ClassProperty>path.node
+            if (t.isIdentifier(node.key)
+                && node.key.name === 'defaultProps'
+            ) {
+                defaultProps = path
+            }
+        }
+    })
+
+    return defaultProps
+}
+
 /**
  * 执行代码, 拿到propTypes
  * @param code 代码内容为字符串
@@ -103,8 +121,9 @@ function getPropTypesPath(path: NodePath): NodePath | null {
 function execExtractCode(code: string, file: string, config: ParserConfig) {
     let result: any = null
     const script = new vm.Script(code)
-    const sandbox = { global, require: require, console, module, exports, __filename: file, __dirname: path.dirname(file), callback: ((res: any) => {
+    const sandbox = { global, require: require, console, module, exports, __filename: file, __dirname: path.dirname(file), callback: ((res: any, res1: any) => {
         result = res
+        console.log(res, res1)
     })};
     (<object>config.globalObject)['__babelConfig__'] = generateBabelConfig(config)
     assignToGlobal(<object>config.globalObject)

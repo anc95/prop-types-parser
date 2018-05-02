@@ -6,7 +6,7 @@ import * as t from 'babel-types'
 import { NodePath } from 'babel-traverse'
 import ignore from '../utils/ignore'
 import getJsonObjComments from '../utils/getJsonObjComments'
-import { addComments } from '../lib/comments'
+import { addComments } from '../core/comments'
 
 const easyPropTypes = path.join(__dirname, '../utils/propTypes.js')
 
