@@ -119,11 +119,12 @@ function getDefaultPropsPath(path: NodePath): NodePath | null {
  * @param code 代码内容为字符串
  */
 function execExtractCode(code: string, file: string, config: ParserConfig) {
-    let result: any = null
+    let propTypes: any = null
+    let defaultProps: any = null
     const script = new vm.Script(code)
-    const sandbox = { global, require: require, console, module, exports, __filename: file, __dirname: path.dirname(file), callback: ((res: any, res1: any) => {
-        result = res
-        console.log(res, res1)
+    const sandbox = { global, require: require, console, module, exports, __filename: file, __dirname: path.dirname(file), callback: ((_propTypes: any, _defaultProps: any) => {
+        propTypes = _propTypes
+        defaultProps = _defaultProps
     })};
     (<object>config.globalObject)['__babelConfig__'] = generateBabelConfig(config)
     assignToGlobal(<object>config.globalObject)
@@ -131,7 +132,15 @@ function execExtractCode(code: string, file: string, config: ParserConfig) {
     script.runInContext(sandbox)
     removeFromGlobal(<object>config.globalObject)
     
-    return result
+    if (typeof defaultProps === 'object') {
+        for (let key of Object.keys(defaultProps)) {
+            if (propTypes[key]) {
+                propTypes[key].defaultValue = defaultProps[key]
+            }
+        }
+    }
+
+    return propTypes
 }
 
 function generateBabelConfig(config: ParserConfig) {
