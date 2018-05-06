@@ -10,6 +10,7 @@
   },
   "scripts": {
     "dev": "tsc -w",
+    "build": "rm -rf dist && tsc",
     "test": "rm -rf dist && tsc",
     "publish": "npm run build && npm publish"
   },
