@@ -27,18 +27,19 @@ export default function(propTypesPath: NodePath, defaultPropsPath: NodePath, cwd
             findAllDependencesByObj(defaultPropsPath.get('value'))
         )
     )
-    changeImportedSource(dependencies, cwd, <object>config.alias, <object>config.resolveModule)
+    resolveDepsNotJs(dependencies);
+    changeImportedSource(dependencies, cwd, <object>config.alias, <object>config.resolveModule);
 
     if (dependencies && dependencies.length) {
         dependencies.forEach(dep => {
-            programAst.body.push(dep.node)
+            programAst.body.push(dep.node);
         })
     }
 
-    programAst.body.push(transStaticPropertyToDeclare(node, '_propTypes_'))
-    programAst.body.push(transStaticPropertyToDeclare(defaultPropsPath.node, '_defaultProps_')) 
-    const code: string = <string>transformFromAst(programAst).code
-    return babelRegisterCode + <string>transform(code, {presets: [require('babel-preset-env'), require('babel-preset-stage-0')]}).code + 'callback && callback(_propTypes_, _defaultProps_)'
+    programAst.body.push(transStaticPropertyToDeclare(node, '_propTypes_'));
+    programAst.body.push(transStaticPropertyToDeclare(defaultPropsPath.node, '_defaultProps_'));
+    const code: string = <string>transformFromAst(programAst).code;
+    return babelRegisterCode + <string>transform(code, {presets: [require('babel-preset-env'), require('babel-preset-stage-0')]}).code + 'callback && callback(_propTypes_, _defaultProps_)';
 }
 
 /**
@@ -113,4 +114,31 @@ function resolveAlias(filePath: string, alias: any, dirname: string): string {
     }
 
     return filePath
+}
+// avoiding to import img or css file, caused by only transforming js is supported by babel
+function resolveDepsNotJs(dependencies: any[]) {
+    dependencies.forEach((dep: any) => {
+        if (t.isImportDeclaration(dep.node)) {
+            if (
+                // assume it is default export
+                t.isImportDefaultSpecifier(_.get(dep, 'node.specifiers.0'))
+                && _.get(dep, 'node.specifiers').length === 1
+                && /(\.less|\.css|\.sass|\.png|\.jpg|\.svg|\.gif)$/.test(_.get(dep, 'node.source.value'))
+            ) {
+                const specifierName = _.get(dep, 'node.specifiers.0.local.name');
+                const source = _.get(dep, 'node.source.value');
+                dep.replaceWith(
+                    t.variableDeclaration(
+                        'var',
+                        [
+                            t.variableDeclarator(
+                                t.identifier(specifierName),
+                                t.stringLiteral(source)
+                            )
+                        ]
+                    )
+                )
+            }
+        }
+    }) 
 }

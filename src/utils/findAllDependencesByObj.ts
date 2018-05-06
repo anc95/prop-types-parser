@@ -12,6 +12,7 @@ import * as t from 'babel-types'
 import * as _ from 'lodash'
 import findIndentifierDeclaration from './findIndentifierDeclaration'
 import { NodePath } from 'babel-traverse';
+import ignore from './ignore';
 
 export default function findAllDependencies(path: NodePath, visitedId?: any, dependences?: NodePath[]): NodePath[] {
     dependences = dependences ? dependences : []
@@ -26,7 +27,11 @@ export default function findAllDependencies(path: NodePath, visitedId?: any, dep
         return dependences
     }
 
+    _.set(path, 'visited', true)
+
     path.traverse({
+        ArrowFunctionExpression: ignore,
+        FunctionExpression: ignore,
         SpreadElement: handleSpreadProperty.bind(null, visitedId, dependences),
         MemberExpression: handleMemberExpression.bind(null, visitedId, dependences),
         SpreadProperty: handleSpreadProperty.bind(null, visitedId, dependences),
@@ -35,8 +40,6 @@ export default function findAllDependencies(path: NodePath, visitedId?: any, dep
             findAllDependencies(path, visitedId, dependences)
         }
     })
-
-    _.set(path, 'visited', true)
 
     dependences.forEach(path => {
         if (!_.get(path, 'visited')) {
