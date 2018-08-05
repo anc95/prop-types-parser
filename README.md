@@ -12,7 +12,7 @@ parse prop-types to analysize react components props data stucture
 ## install
 `npm install react-prop-types-parser`
 
-## ussage
+## usage
 
 ```
 import { parse, parseSeries } from 'react-prop-types-parser'
