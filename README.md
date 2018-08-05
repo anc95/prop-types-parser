@@ -25,7 +25,7 @@ parse(file, options)
 interface ParserConfig {
     /**
      * @desciption alias in code
-     * @example {'@module', path.join(__dirname, ''../lib/@module'')}
+     * @example {'@module': path.join(__dirname, ''../lib/@module'')}
      */
     alias?: Object,
     /**
@@ -36,7 +36,7 @@ interface ParserConfig {
     globalObject?: Object,
     /**
      * @description replace the third module with your module, so we have the effort to support more prop-types-like library
-     * @example {'prop-types', path.join(__dirname, '../lib/prop-types')}
+     * @example {'prop-types': path.join(__dirname, '../lib/prop-types')}
      */
     resolveModule?: Object,
     /**
